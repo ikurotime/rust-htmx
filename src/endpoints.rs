@@ -3,25 +3,42 @@ use serde::{Serialize, Deserialize};
 
 use askama::Template;
 // PAGE ONE
+#[derive(Template)]
+#[template(path = "hello.html")]
+struct HelloTemplate;
 pub async fn get_index() -> impl IntoResponse {
     let template = HelloTemplate {};
     HtmlTemplate(template)
 }
 
-#[derive(Template)]
-#[template(path = "hello.html")]
-struct HelloTemplate;
 // PAGE TWO
+#[derive(Template)]
+#[template(path = "another_page.html")]
+struct AnotherPage;
 pub async fn get_page_two() -> impl IntoResponse {
     let template = AnotherPage{};
     HtmlTemplate(template)
 }
 
-#[derive(Template)]
-#[template(path = "another_page.html")]
-struct AnotherPage;
 
+pub async fn post_data(Json(payload):Json<CreateMessage>) -> Json<Message>{
+    let message = Message{
+        id: 1,
+        message: payload.message.to_string(),
+    };
+    Json(message)
+}
 
+#[derive(Serialize)]
+pub struct Message {
+    id: i32,
+    message: String,
+}
+
+#[derive(Deserialize)]
+pub struct CreateMessage {
+    message: String,
+}
 
 struct HtmlTemplate<T>(T);
 
@@ -42,24 +59,5 @@ where
                 .into_response(),
         }
     }
-}
-
-pub async fn post_data(Json(payload):Json<CreateMessage>) -> Json<Message>{
-    let message = Message{
-        id: 1,
-        message: payload.message.to_string(),
-    };
-    Json(message)
-}
-
-#[derive(Serialize)]
-pub struct Message {
-    id: i32,
-    message: String,
-}
-
-#[derive(Deserialize)]
-pub struct CreateMessage {
-    message: String,
 }
 
